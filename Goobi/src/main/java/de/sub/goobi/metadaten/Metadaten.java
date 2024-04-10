@@ -130,6 +130,7 @@ import ugh.exceptions.ReadException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.TypeNotAllowedForParentException;
 import ugh.exceptions.WriteException;
+import de.sub.goobi.mock.MockProcess;
 
 /**
  * Die Klasse Schritt ist ein Bean für einen einzelnen Schritt mit dessen Eigenschaften und erlaubt die Bearbeitung der Schrittdetails
@@ -141,6 +142,8 @@ import ugh.exceptions.WriteException;
 @WindowScoped
 @Log4j2
 public class Metadaten implements Serializable {
+
+    private Process process;
 
     private static final long serialVersionUID = 2361148967408139027L;
 
@@ -3954,7 +3957,21 @@ public class Metadaten implements Serializable {
         return myMetadaten.get(0);
     }
 
-    public String search() {
+    public String search() throws Exception {
+        if(currentMetadataToPerformSearch == null){
+            try {
+                process = MockProcess.createProcess();
+                setMyBenutzerID("1");
+                setMyProzess(process);
+                XMLlesenStart();
+                setTempTyp("_pagephysstart");
+            }catch (SwapException | IOException e) {
+                    log.error(e);
+            }
+            Person p = new Person(this.myPrefs.getMetadataTypeByName("Author"));
+            MetaPerson md = new MetaPerson(p, 0, this.myPrefs, null, process, null);
+            currentMetadataToPerformSearch = md;
+        }
         if (currentMetadataToPerformSearch != null) {
             if (currentMetadataToPerformSearch.getMetadataDisplaytype() == DisplayType.dante) {
                 currentMetadataToPerformSearch.setSearchValue(danteSearchValue);
